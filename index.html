@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太平地国 | 官方网站</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">太平地国 PROJECT</div>
+    <nav>
+        <button class="nav-btn active" onclick="switchGame('game1', '太平地国：第一章')">游戏第一部</button>
+        <button class="nav-btn" onclick="switchGame('game2', '太平地国：第二章')">游戏第二部</button>
+    </nav>
+</header>
+
+<div class="main-layout">
+    <div class="game-container">
+        <div class="game-top-bar">
+            <span id="current-title">正在运行：太平地国 - 第一章</span>
+            <button class="fullscreen-btn" onclick="goFullScreen()">进入全屏模式</button>
+        </div>
+        
+        <div class="iframe-wrapper">
+            <iframe id="main-iframe" src="game1/index.html" allow="autoplay; fullscreen; keyboard"></iframe>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <section class="info-block">
+            <h3>作品简介</h3>
+            <p id="game-desc">这是关于张金秀与刘犊犊的第一个故事。面对秩序与刚强的博弈，你的选择将决定太平地国的未来。</p>
+        </section>
+
+        <section class="info-block">
+            <h3>站内公告</h3>
+            <ul>
+                <li>[2026-02-15] 网站正式上线</li>
+                <li>[2026-02-15] 游戏 Web 版性能优化完成</li>
+            </ul>
+        </section>
+    </aside>
+</div>
+
+<script>
+    // 切换游戏逻辑
+    function switchGame(folder, title) {
+        const iframe = document.getElementById('main-iframe');
+        const titleDisplay = document.getElementById('current-title');
+        const descDisplay = document.getElementById('game-desc');
+        
+        // 更新显示
+        iframe.src = folder + '/index.html';
+        titleDisplay.innerText = '正在运行：' + title;
+        
+        // 更新简介逻辑
+        if(folder === 'game2') {
+            descDisplay.innerText = "第二章：刘安塞的计谋。在这场权力的迷雾中，谁才是真正的赢家？";
+        } else {
+            descDisplay.innerText = "第一章：神册之谜。张金秀的刚强人生，从这里开始。";
+        }
+
+        // 切换按钮高亮
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // 全屏函数
+    function goFullScreen() {
+        const iframe = document.getElementById('main-iframe');
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+        else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+        else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+    }
+</script>
+
+</body>
+</html>
