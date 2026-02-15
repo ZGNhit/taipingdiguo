@@ -2,6 +2,7 @@
 <html lang="en-us">
 
 <head>
+  <base href="/game1/">
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Gal地国：神册物语</title>
@@ -220,11 +221,11 @@
       window.gameZipURL = 'https://github.com/ZGNhit/taipingdiguo/releases/download/v1.0/game.zip';
 
       // Register the service worker.
-      if (navigator.serviceWorker) {
-          if (!navigator.serviceWorker.controller) {
-              navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'all' });
-          }
-      }
+       if ('serviceWorker' in navigator) {
+    		navigator.serviceWorker.register('/game1/service-worker.js', {
+      scope: '/game1/'
+    });
+  }
   </script>
   <script src="renpy-pre.js"></script>
   <script async type="text/javascript" src="renpy.js"></script>
