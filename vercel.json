@@ -1,3 +1,14 @@
 {
-  "installCommand": "git lfs install && git lfs pull"
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "routes": [
+    {
+      "src": "^/game1$",
+      "dest": "/game1/index.html"
+    },
+    {
+      "src": "^/game1/(.*)",
+      "dest": "/game1/$1"
+    }
+  ]
 }
