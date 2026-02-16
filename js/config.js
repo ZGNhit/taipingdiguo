@@ -42,8 +42,7 @@ const CONFIG = {
     // 5. 密码设置
     passwords: {
         expireDays: 365,
-        // 修正：确保路径指向根目录下的 data 文件夹
-        fileUrl: 'https://raw.githubusercontent.com/ZGNhit/taipingdiguo.github.io/main/data/passwords.json'
+        fileUrl: 'https://raw.githubusercontent.com/ZGNhit/taipingdiguo/main/data/passwords.json'
     },
 
     // 6. 主题颜色
@@ -57,3 +56,4 @@ const CONFIG = {
 
 // 保持变量一致性
 console.log("CONFIG 加载成功，当前密码路径:", CONFIG.passwords.fileUrl);
+
