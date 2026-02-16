@@ -84,12 +84,13 @@
     // 2. 动态解码并获取 Token (解决他人上传问题的核心)
     function getValidToken() {
         try {
-            const s = CONFIG.submission;
-            const fullToken = s.partA + s.partB + s.partC;
-            
-            if (fullToken.startsWith('ghp_') && fullToken.length > 20) {
-                return fullToken;
-            }
+           if (typeof CONFIG !== 'undefined' && CONFIG.submission) {
+                const s = CONFIG.submission;
+                const fullToken = s.partA + s.partB + s.partC;
+                
+                if (fullToken.startsWith('ghp_') && fullToken.length > 20) {
+                    return fullToken;
+                }
             }
         } catch (e) {
             console.error("Token 解码异常");
@@ -225,5 +226,6 @@
 </style>
 </body>
 </html>
+
 
 
