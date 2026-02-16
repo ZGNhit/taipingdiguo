@@ -86,7 +86,8 @@
         try {
             if (typeof CONFIG !== 'undefined' && CONFIG.submission && CONFIG.submission.eToken) {
                 // 解码 Base64 Token
-                return atob(CONFIG.submission.eToken);
+                const encoded = CONFIG.submission.part1 + CONFIG.submission.part2;
+                return atob(encoded);
             }
         } catch (e) {
             console.error("Token 解码异常");
@@ -222,3 +223,4 @@
 </style>
 </body>
 </html>
+
