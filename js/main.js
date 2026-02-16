@@ -33,7 +33,7 @@ function checkLogin() {
  */
 function protectPage() {
     if (!checkLogin()) {
-        window.location.href = '/taipingdiguo/login.html';
+        window.location.href = 'login.html';
     }
 }
 
@@ -44,7 +44,7 @@ function logout() {
     localStorage.removeItem('site_access');
     localStorage.removeItem('access_expire');
     localStorage.removeItem('login_time');
-    window.location.href = '/taipingdiguo/login.html';
+    window.location.href = 'login.html';
 }
 
 /**
@@ -61,7 +61,7 @@ function updateUserStatus() {
             <button onclick="logout()" class="btn-logout">退出</button>
         `;
     } else {
-        userDiv.innerHTML = `<a href="/taipingdiguo/login.html" class="login-link">登录</a>`;
+        userDiv.innerHTML = `<a href="login.html" class="login-link">登录</a>`;
     }
 }
 
@@ -87,7 +87,7 @@ async function loadArticles() {
         const articles = await response.json();
         
         if (articles.length === 0) {
-            articleList.innerHTML = '<p class="empty-message">还没有文章，快来<a href="/taipingdiguo/submit.html">发布第一篇</a>吧！</p>';
+            articleList.innerHTML = '<p class="empty-message">还没有文章，快来<a href="submit.html">发布第一篇</a>吧！</p>';
             return;
         }
         
@@ -105,10 +105,10 @@ async function loadArticles() {
                 .substring(0, 120) + (article.body.length > 120 ? '...' : '');
             
             html += `
-                <div class="article-card" onclick="location.href='/taipingdiguo/article.html?id=${article.number}'">
+                <div class="article-card" onclick="location.href='article.html?id=${article.number}'">
                     ${thumbnail ? `<div class="article-thumbnail"><img src="${thumbnail}" alt="缩略图" onerror="this.style.display='none'"></div>` : ''}
                     <div class="article-info">
-                        <h3><a href="/taipingdiguo/article.html?id=${article.number}">${article.title}</a></h3>
+                        <h3><a href="article.html?id=${article.number}">${article.title}</a></h3>
                         <p class="article-preview">${preview}</p>
                         <div class="article-meta">
                             <span>👤 ${article.user.login}</span>
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 根据不同页面加载不同内容
     const path = window.location.pathname;
     
-    if (path.includes('index.html') || path === '/taipingdiguo/' || path === '/taipingdiguo') {
+    if (path.includes('index.html') || path === '' || path === '') {
         // 首页：加载文章和游戏
         loadArticles();
         loadGames();
@@ -245,3 +245,4 @@ document.addEventListener('DOMContentLoaded', function() {
 // 暴露全局函数
 window.logout = logout;
 window.copyToClipboard = copyToClipboard;
+
