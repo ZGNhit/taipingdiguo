@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 太平地国</title>
     <link rel="stylesheet" href="/taipingdiguo/css/style.css">
-    <script src="/taipingdiguo/js/config.js"></script>
-    <script src="/taipingdiguo/js/main.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
 </head>
 <body class="login-page">
     <div class="login-container">
@@ -31,7 +31,7 @@
         </div>
         
         <p class="login-footer">
-            <a href="/taipingdiguo/about.html">关于本站</a> | 
+            <a href="about.html">关于本站</a> | 
             <span>需要密码？联系天王</span>
         </p>
     </div>
@@ -52,16 +52,16 @@
     });
 
     /**
-     * 修复版：从 GitHub 加载密码文件
+     * 从 GitHub 加载密码文件
      */
     async function loadPasswords() {
         let url = '';
         
-        // 逻辑修正：优先使用 config.js 锁定的路径
+
         if (typeof CONFIG !== 'undefined' && CONFIG.passwords && CONFIG.passwords.fileUrl) {
             url = CONFIG.passwords.fileUrl;
         } else {
-            // 兜底路径：确保仓库名和你的 config.js 一致 (taipingdiguo)
+
             url = 'https://raw.githubusercontent.com/ZGNhit/taipingdiguo/main/data/passwords.json';
         }
 
@@ -81,7 +81,7 @@
             return [];
         } catch (error) {
             console.error('读取密码文件失败，使用紧急备用密码:', error);
-            return ['renpyfan']; // 只有网络断开或 404 才会走这里
+            return ['tptg']; // 只有网络断开或 404 才会走这里
         }
     }
 
@@ -112,7 +112,7 @@
             localStorage.setItem('access_expire', expireTime);
             localStorage.setItem('login_code', inputPwd);
             
-            window.location.href = '/taipingdiguo/index.html';
+            window.location.href = 'index.html';
         } else {
             errorDiv.textContent = '❌ 密码错误，请联系管理员';
             btn.disabled = false;
@@ -124,3 +124,4 @@
     </script>
 </body>
 </html>
+
