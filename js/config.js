@@ -6,7 +6,6 @@ const CONFIG = {
     },
 
     submission: {
-        // Base64 token 
         part1: 'Z2hwX296WEp0WWpZNXRuVHJ', 
         part2: 'CT2o1QXZCNjF2UDFMWHZXejFhMndtSg==', 
         enabled: true
@@ -63,6 +62,7 @@ const CONFIG = {
 
 // 保持变量一致性
 console.log("CONFIG 加载成功，当前密码路径:", CONFIG.passwords.fileUrl);
+
 
 
 
