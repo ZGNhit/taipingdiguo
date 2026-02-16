@@ -21,21 +21,20 @@ const CONFIG = {
     games: [
         {
             id: 1,
-            name: '游戏名称1',              // 游戏名称
-            description: '这里是游戏1的简介，可以在 config.js 里修改',  // 游戏简介
-            url: 'https://itch.io/embed/1',  // 游戏跳转链接（替换成实际的 Itch.io 地址）
-            thumbnail: '🎮',                  // 图标（可以改成图片URL）
+            name: 'Gal地国：神册物语',              // 游戏名称
+            description: '一作',  // 游戏简介
+            url: 'https://taipingdiguo.itch.io/galdg1',  // 游戏跳转链接
+            thumbnail: '🎮',                  // 图标
             enabled: true                     // 是否启用
         },
         {
             id: 2,
-            name: '游戏名称2',
-            description: '这里是游戏2的简介，可以在 config.js 里修改',
-            url: 'https://itch.io/embed/2',
+            name: 'Gal地国：杯与祭',
+            description: '二作',
+            url: 'https://taipingdiguo.itch.io/galdg2',
             thumbnail: '🎲',
             enabled: true
         },
-        // 想增加新游戏？在这里复制上面的对象，修改即可
         // {
         //     id: 3,
         //     name: '新游戏',
@@ -46,14 +45,11 @@ const CONFIG = {
         // }
     ],
 
-    // 关于页面内容（完全留白，你可以自由填写）
+    // 关于页面内容
     about: {
         title: '关于本站',           // 关于页面标题
-        content: `                  // 关于页面内容（支持 HTML）
-            <p>这里是关于页面的内容，你可以在 config.js 里随意修改。</p>
-            <p>支持 HTML 标签，可以加图片、链接等。</p>
-            <p>比如：<a href="#">这是一个链接</a></p>
-        `,
+        content: `                  // 关于页面内容
+            
         showOnMenu: true            // 是否在菜单显示
     },
 
@@ -75,3 +71,4 @@ const CONFIG = {
 // 自动生成密码文件的完整URL（不用改）
 
 CONFIG.passwords.fileUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/data/passwords.json`;
+
