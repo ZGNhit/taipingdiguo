@@ -5,6 +5,12 @@ const CONFIG = {
         repo: 'taipingdiguo', 
     },
 
+    submission: {
+        // Base64 token 
+        encodedToken: 'Z2hwX296WEp0WWpZNXRuVHJCT2o1QXZCNjF2UDFMWHZXejFhMndtSg==', 
+        enabled: true
+    },
+    
     // 2. 网站基本信息
     site: {
         title: '太平地国',
@@ -56,4 +62,5 @@ const CONFIG = {
 
 // 保持变量一致性
 console.log("CONFIG 加载成功，当前密码路径:", CONFIG.passwords.fileUrl);
+
 
