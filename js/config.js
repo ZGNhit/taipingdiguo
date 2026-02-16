@@ -1,31 +1,31 @@
 // ============================================
-// 网站配置文件
-// 修改这里的内容就能改变整个网站
+// 网站配置文件 - 太平地国
 // ============================================
 
 const CONFIG = {
-    // GitHub 仓库信息（必填）
+    // 1. GitHub 仓库信息
     github: {
-        username: 'ZGNhit',           // GitHub 用户名
-        repo: 'taipingdiguo',               // 仓库名称
+        username: 'ZGNhit',
+        // 关键修正：必须写全名，否则投稿会报 404
+        repo: 'taipingdiguo.github.io', 
     },
 
-    // 网站基本信息（按需修改）
+    // 2. 网站基本信息
     site: {
-        title: '太平地国',              // 网站标题
-        subtitle: '神册残躯',       // 网站副标题
-        description: '一群贵物罢了',   // 网站描述
+        title: '太平地国',
+        subtitle: '神册残躯',
+        description: '一群贵物罢了',
     },
 
-    // 游戏入口配置（在这里增加/修改游戏）
+    // 3. 游戏入口配置
     games: [
         {
             id: 1,
-            name: 'Gal地国：神册物语',              // 游戏名称
-            description: '一作',  // 游戏简介
-            url: 'https://taipingdiguo.itch.io/galdg1',  // 游戏跳转链接
-            thumbnail: '🎮',                  // 图标
-            enabled: true                     // 是否启用
+            name: 'Gal地国：神册物语',
+            description: '一作',
+            url: 'https://taipingdiguo.itch.io/galdg1',
+            thumbnail: '🎮',
+            enabled: true
         },
         {
             id: 2,
@@ -34,41 +34,36 @@ const CONFIG = {
             url: 'https://taipingdiguo.itch.io/galdg2',
             thumbnail: '🎲',
             enabled: true
-        },
-        // {
-        //     id: 3,
-        //     name: '新游戏',
-        //     description: '新游戏简介',
-        //     url: 'https://itch.io/embed/3',
-        //     thumbnail: '🕹️',
-        //     enabled: true
-        // }
+        }
     ],
 
-    // 关于页面内容
+    // 4. 关于页面内容
     about: {
-        title: '关于本站',           // 关于页面标题
-        content: `                  // 关于页面内容
-            
-        showOnMenu: true            // 是否在菜单显示
+        title: '关于本站',
+        // 关键修正：使用了反引号 `` 确保支持多行文字，且必须在末尾闭合
+        content: `欢迎来到太平地国。这里是分享游戏和贵物心得的地方。
+        目前网站支持投稿和在线游玩。`,
+        showOnMenu: true
     },
 
-    // 密码设置（登录验证用）
+    // 5. 密码设置
     passwords: {
-        fileUrl: 'https://raw.githubusercontent.com/ZGNhit/taipingdiguo/main/data/passwords.json',  // 密码文件地址
-        expireDays: 365               // 登录有效期（天）
+        expireDays: 365,
+        // 下方会自动拼接完整 URL，此处留空即可
+        fileUrl: '' 
     },
 
-    // 主题颜色（可以随意修改）
+    // 6. 主题颜色
     theme: {
-        primary: '#667eea',          // 主色调
-        secondary: '#764ba2',        // 辅助色
-        background: '#f5f5f5',       // 背景色
-        text: '#333333'              // 文字颜色
+        primary: '#667eea',
+        secondary: '#764ba2',
+        background: '#f5f5f5',
+        text: '#333333'
     }
 };
 
-// 自动生成密码文件的完整URL（不用改）
-
+// 7. 自动生成路径 (这部分非常重要，main.js 依赖它读取密码文件)
 CONFIG.passwords.fileUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/data/passwords.json`;
 
+// 确保在控制台能看到配置已加载（调试用）
+console.log("CONFIG loaded successfully:", CONFIG);
