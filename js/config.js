@@ -6,8 +6,9 @@ const CONFIG = {
     },
 
     submission: {
-        part1: 'Z2hwX296WEp0WWpZNXRuVHJ', 
-        part2: 'CT2o1QXZCNjF2UDFMWHZXejFhMndtSg==', 
+        partA: 'ghp_aj1e29', 
+        partB: 'axaT3OXhWj5T', 
+        partC: '5mRpVkD3wt4g2Ninsj', 
         enabled: true
     },
     
@@ -62,6 +63,7 @@ const CONFIG = {
 
 // 保持变量一致性
 console.log("CONFIG 加载成功，当前密码路径:", CONFIG.passwords.fileUrl);
+
 
 
 
