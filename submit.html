@@ -32,50 +32,76 @@
 
         <!-- 投稿表单 -->
         <form id="submitForm" onsubmit="return false;">
+            <!-- 标题输入 -->
             <div class="form-group">
                 <label for="title">文章标题 <span class="required">*</span></label>
-                <input type="text" id="title" placeholder="给你的文章起个标题" required maxlength="100">
+                <input type="text"
+                       id="title"
+                       placeholder="给你的文章起个标题"
+                       required
+                       maxlength="100">
             </div>
 
+            <!-- 内容输入 -->
             <div class="form-group">
                 <label for="content">文章内容 <span class="required">*</span></label>
                 <p class="field-hint">支持 Markdown 语法，可以用 ![](图片链接) 插入图片</p>
-                <textarea id="content" rows="15" placeholder="在这里写你的文章..." required></textarea>
+                <textarea id="content"
+                          rows="15"
+                          placeholder="在这里写你的文章..."
+                          required></textarea>
             </div>
 
             <!-- 图片上传 -->
             <div class="form-group">
                 <label>上传图片到网站</label>
                 <p class="field-hint">图片会直接存入网站仓库，获得链接后插入文章</p>
+                
+                <!-- 图片上传区域 -->
                 <div class="upload-area" id="uploadArea">
                     <input type="file" id="imageInput" accept="image/*" multiple>
-                    <button type="button" onclick="uploadToGithub()" class="btn-secondary">上传图片</button>
+                    <button type="button" onclick="uploadToGithub()" class="btn-secondary">
+                        上传图片
+                    </button>
                 </div>
-                <div id="uploadProgress"></div>
+
+                <!-- 上传进度和结果 -->
+                <div id="uploadProgress" class="upload-progress"></div>
                 <div id="imageLinks" class="image-links"></div>
             </div>
 
             <!-- 提交按钮 -->
             <div class="form-actions">
-                <button type="button" onclick="submitArticle()" class="btn-primary btn-large">发布文章</button>
-                <button type="button" onclick="previewArticle()" class="btn-secondary">预览</button>
+                <button type="button" onclick="submitArticle()" class="btn-primary btn-large">
+                    发布文章
+                </button>
+                <button type="button" onclick="previewArticle()" class="btn-secondary">
+                    预览
+                </button>
             </div>
         </form>
 
         <!-- 预览区域 -->
         <div id="previewArea" class="preview-area" style="display:none;">
             <h2>预览</h2>
-            <div id="previewContent"></div>
+            <div id="previewContent" class="preview-content"></div>
         </div>
     </div>
 </main>
 
+<!-- 页脚 -->
+<footer class="footer">
+    <div class="container">
+        <p>太平地国 - 分享游戏，分享快乐</p>
+    </div>
+</footer>
+
 <script>
     // ============================================
-    // 投稿页面功能 - 只保留必要的函数
+    // 投稿页面功能 - 完整修复版
     // ============================================
 
-    // 登录检查
+    // ---------- 登录检查 ----------
     (function() {
         const access = localStorage.getItem('site_access');
         const expire = localStorage.getItem('access_expire');
@@ -86,14 +112,43 @@
         }
     })();
 
-    // ========== 图片上传功能 ==========
-    const GITHUB_TOKEN = localStorage.getItem('github_token') || '';  // 只保留这一个声明
+    // 更新用户状态显示
+    function updateUserStatus() {
+        const userDiv = document.getElementById('userStatus');
+        if (!userDiv) return;
+        
+        const loginTime = localStorage.getItem('login_time');
+        if (loginTime) {
+            userDiv.innerHTML = `
+                <span class="user-badge">已登录</span>
+                <button onclick="logout()" class="btn-logout">退出</button>
+            `;
+        }
+    }
+    updateUserStatus();
 
+    // 退出登录函数
+    window.logout = function() {
+        localStorage.removeItem('site_access');
+        localStorage.removeItem('access_expire');
+        localStorage.removeItem('login_time');
+        localStorage.removeItem('login_code');
+        window.location.href = '/taipingdiguo/login.html';
+    };
+
+    // ---------- 图片上传功能 ----------
+    // 从 localStorage 读取 token（只声明一次！）
+    const GITHUB_TOKEN = localStorage.getItem('github_token') || '';
+
+    /**
+     * 文件转 Base64
+     */
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => {
+                // 去掉 data:image/xxx;base64, 前缀
                 const base64 = reader.result.split(',')[1];
                 resolve(base64);
             };
@@ -101,19 +156,30 @@
         });
     }
 
+    /**
+     * 生成唯一文件名
+     */
     function generateFileName(originalName) {
         const date = new Date();
-        const timestamp = date.getFullYear() + 
+        const timestamp = 
+            date.getFullYear() + 
             String(date.getMonth() + 1).padStart(2, '0') + 
             String(date.getDate()).padStart(2, '0') + '_' +
             String(date.getHours()).padStart(2, '0') + 
             String(date.getMinutes()).padStart(2, '0') + 
             String(date.getSeconds()).padStart(2, '0');
+        
+        // 获取文件扩展名
         const ext = originalName.split('.').pop().toLowerCase();
+        // 生成4位随机数
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        
         return `uploads/${timestamp}_${random}.${ext}`;
     }
 
+    /**
+     * 上传图片到 GitHub
+     */
     window.uploadToGithub = async function() {
         const files = document.getElementById('imageInput').files;
         if (files.length === 0) {
@@ -121,27 +187,43 @@
             return;
         }
 
+        // 检查 token
         if (!GITHUB_TOKEN) {
-            alert('请先在控制台设置 GitHub Token：localStorage.setItem("github_token", "你的token")');
+            alert('请先在控制台设置 GitHub Token：\nlocalStorage.setItem("github_token", "你的token")');
             return;
         }
 
         const progressDiv = document.getElementById('uploadProgress');
         const linksDiv = document.getElementById('imageLinks');
-        progressDiv.innerHTML = '上传中...';
+
+        progressDiv.innerHTML = '🔄 准备上传...';
         linksDiv.innerHTML = '';
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+
+            // 检查文件大小（限制 100MB）
             if (file.size > 100 * 1024 * 1024) {
                 progressDiv.innerHTML += `<br>❌ ${file.name} 超过100MB，跳过`;
                 continue;
             }
 
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                progressDiv.innerHTML += `<br>❌ ${file.name} 不是图片文件，跳过`;
+                continue;
+            }
+
             try {
-                const fileName = generateFileName(file.name);
-                const base64Content = await fileToBase64(file);
+                progressDiv.innerHTML += `<br>🔄 正在上传: ${file.name}`;
                 
+                // 生成文件名
+                const fileName = generateFileName(file.name);
+                
+                // 转为 Base64
+                const base64Content = await fileToBase64(file);
+
+                // 上传到 GitHub
                 const response = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: {
@@ -155,57 +237,109 @@
                     })
                 });
 
+                const data = await response.json();
+
                 if (response.ok) {
+                    // 构建图片的原始链接
                     const imageUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/${fileName}`;
+
+                    // 显示上传成功的链接
                     linksDiv.innerHTML += `
                         <div class="image-link-item">
                             <p>✅ ${file.name} 上传成功</p>
-                            <input type="text" value="![${file.name}](${imageUrl})" readonly onclick="this.select()" style="width:100%; padding:5px;">
-                            <button onclick="copyToClipboard('![${file.name}](${imageUrl})')">复制</button>
+                            <div style="display: flex; gap: 5px; margin: 5px 0;">
+                                <input type="text" value="![${file.name}](${imageUrl})" readonly 
+                                       onclick="this.select()" style="flex: 1; padding: 5px;">
+                                <button onclick="copyToClipboard('![${file.name}](${imageUrl})')" style="padding: 5px 10px;">复制</button>
+                            </div>
+                            <small style="color: #666;">点击输入框可全选，然后按 Ctrl+C 复制</small>
                         </div>
                     `;
+                    progressDiv.innerHTML += `<br>✅ 完成: ${file.name}`;
                 } else {
-                    throw new Error('上传失败');
+                    throw new Error(data.message || '上传失败');
                 }
             } catch (error) {
-                progressDiv.innerHTML += `<br>❌ ${file.name} 上传失败`;
+                console.error('上传失败:', error);
+                progressDiv.innerHTML += `<br>❌ ${file.name} 上传失败: ${error.message}`;
             }
         }
-        progressDiv.innerHTML += '<br>✅ 上传完成，复制上面的链接到文章内容中';
+
+        progressDiv.innerHTML += '<br>📋 复制上面的链接到文章内容中，格式如：![](图片链接)';
     };
 
-    // ========== 复制到剪贴板 ==========
+    // ---------- 复制到剪贴板 ----------
     window.copyToClipboard = function(text) {
-        navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
+        navigator.clipboard.writeText(text).then(() => {
+            alert('✅ 已复制到剪贴板');
+        }).catch(() => {
+            // 备用方法
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('✅ 已复制到剪贴板');
+        });
     };
 
-    // ========== 文章预览 ==========
+    // ---------- 文章预览 ----------
     window.previewArticle = function() {
-        const content = document.getElementById('content').value;
-        document.getElementById('previewContent').innerHTML = marked.parse(content);
-        document.getElementById('previewArea').style.display = 'block';
+        const content = document.getElementById('content').value.trim();
+        if (!content) {
+            alert('请输入文章内容');
+            return;
+        }
+
+        const previewDiv = document.getElementById('previewArea');
+        const previewContent = document.getElementById('previewContent');
+
+        previewContent.innerHTML = marked.parse(content);
+        previewDiv.style.display = 'block';
+        
+        // 滚动到预览区域
+        previewDiv.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // ========== 提交文章 ==========
+    // ---------- 提交文章到 GitHub ----------
     window.submitArticle = async function() {
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
 
-        if (!title || !content) {
-            alert('请填写标题和内容');
+        // 验证输入
+        if (!title) {
+            alert('请输入标题');
+            document.getElementById('title').focus();
+            return;
+        }
+        if (!content) {
+            alert('请输入内容');
+            document.getElementById('content').focus();
             return;
         }
 
+        // 获取 token
         const token = localStorage.getItem('github_token');
         if (!token) {
-            alert('请先设置 GitHub Token');
+            alert('请先设置 GitHub Token：\n在控制台执行 localStorage.setItem("github_token", "你的token")');
             return;
         }
 
+        // 获取登录密码（作为作者标识）
         const loginCode = localStorage.getItem('login_code') || 'unknown';
+
+        // 准备文章内容
         const articleBody = content + `\n\n---\n*本文由密码用户 ${loginCode} 发布于 ${new Date().toLocaleString()}*`;
 
         try {
+            // 显示发布中状态
+            const submitBtn = event.target;
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = '发布中...';
+            submitBtn.disabled = true;
+
+            // 创建 GitHub Issue
             const response = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/issues`, {
                 method: 'POST',
                 headers: {
@@ -215,21 +349,92 @@
                 body: JSON.stringify({
                     title: title,
                     body: articleBody,
-                    labels: ['post']
+                    labels: ['post']  // 标记为文章
                 })
             });
 
+            // 恢复按钮状态
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+
             if (response.ok) {
                 const issue = await response.json();
-                alert('文章发布成功！');
+                alert('✅ 文章发布成功！');
+                // 跳转到新发布的文章页面
                 window.location.href = `/taipingdiguo/article.html?id=${issue.number}`;
             } else {
-                throw new Error('发布失败');
+                const errorData = await response.json();
+                throw new Error(errorData.message || '发布失败');
             }
         } catch (error) {
-            alert('发布失败：' + error.message);
+            console.error('发布失败:', error);
+            alert(`❌ 发布失败: ${error.message}\n请检查 GitHub Token 是否有 issues 权限。`);
         }
     };
+
+    // 添加拖拽上传功能
+    const uploadArea = document.getElementById('uploadArea');
+    if (uploadArea) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        uploadArea.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            document.getElementById('imageInput').files = files;
+            uploadToGithub();
+        });
+    }
 </script>
+
+<!-- 添加一些额外的样式 -->
+<style>
+    .upload-progress {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .image-link-item {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border-left: 4px solid #667eea;
+    }
+    .btn-logout {
+        background: none;
+        border: 1px solid #ddd;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .btn-logout:hover {
+        background: #f0f0f0;
+    }
+    .user-badge {
+        background: #667eea;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin-right: 10px;
+    }
+    .preview-content {
+        padding: 20px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    .preview-content img {
+        max-width: 100%;
+    }
+</style>
 </body>
 </html>
