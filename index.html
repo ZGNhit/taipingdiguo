@@ -3,253 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页 - 太平地国</title>
+    <title>太平地国</title>
     <link rel="stylesheet" href="/taipingdiguo/css/style.css">
     <script src="/taipingdiguo/js/config.js"></script>
     <script src="/taipingdiguo/js/marked.min.js"></script>
+    <script src="/taipingdiguo/js/main.js"></script>
 </head>
 <body>
-<!-- ========== 导航栏 ========== -->
-<nav class="navbar">
-    <div class="nav-container">
-        <div class="nav-brand">
-            <a href="index.html">🎮 ${CONFIG.site.title}</a>
-        </div>
-        <div class="nav-menu">
-            <a href="index.html" class="active">首页</a>
-            <a href="submit.html">投稿</a>
-            ${CONFIG.about.showOnMenu ? '<a href="about.html">关于</a>' : ''}
-        </div>
-        <div class="nav-user" id="userStatus">
-            <!-- 用户状态会通过JS动态显示 -->
-        </div>
-    </div>
-</nav>
-
-<!-- ========== 主要内容区域 ========== -->
-<main class="container">
-    <!-- 网站标题区 -->
-    <header class="page-header">
-        <h1>${CONFIG.site.title}</h1>
-        <p class="subtitle">${CONFIG.site.subtitle}</p>
-    </header>
-
-    <!-- 两列布局：左侧文章列表，右侧游戏入口 -->
-    <div class="two-column">
-        <!-- 左侧：文章列表 -->
-        <div class="main-content">
-            <div class="section-header">
-                <h2>📝 最新文章</h2>
-                <a href="submit.html" class="btn-small">我也要投稿</a>
+    <!-- ========== 导航栏 ========== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/taipingdiguo/index.html">🎮 太平地国</a>
             </div>
-
-            <!-- 文章列表容器 -->
-            <div id="articleList" class="article-list">
-                <div class="loading">加载文章中...</div>
+            <div class="nav-menu">
+                <a href="/taipingdiguo/index.html" class="active">首页</a>
+                <a href="/taipingdiguo/submit.html">投稿</a>
+                <a href="/taipingdiguo/about.html">关于</a>
+            </div>
+            <div class="nav-user" id="userStatus">
+                <!-- 用户状态会通过 main.js 动态显示 -->
             </div>
         </div>
+    </nav>
 
-        <!-- 右侧：侧边栏 -->
-        <div class="sidebar">
-            <!-- 游戏入口区域 -->
-            <div class="sidebar-section">
-                <h3>🎮 我的游戏</h3>
-                <div id="gameList" class="game-list">
-                    <!-- 游戏列表会通过JS动态生成 -->
+    <!-- ========== 主要内容区域 ========== -->
+    <main class="container">
+        <!-- 网站标题区 -->
+        <header class="page-header">
+            <h1 id="site-title">太平地国</h1>
+            <p class="subtitle" id="site-subtitle">分享游戏，分享快乐</p>
+        </header>
+
+        <!-- 两列布局：左侧文章列表，右侧游戏入口 -->
+        <div class="two-column">
+            <!-- 左侧：文章列表 -->
+            <div class="main-content">
+                <div class="section-header">
+                    <h2>📝 最新玩家文章</h2>
+                    <a href="/taipingdiguo/submit.html" class="btn-small">我也要投稿</a>
+                </div>
+                
+                <!-- 文章列表容器 -->
+                <div id="articleList" class="article-list">
+                    <div class="loading">加载文章中...</div>
                 </div>
             </div>
 
-            <!-- 网站统计信息 -->
-            <div class="sidebar-section">
-                <h3>📊 网站统计</h3>
-                <div id="siteStats">
-                    <p>文章总数: <span id="totalPosts">计算中...</span></p>
-                    <p>上线天数: <span id="onlineDays">计算中...</span></p>
+            <!-- 右侧：侧边栏 -->
+            <div class="sidebar">
+                <!-- 游戏入口区域 -->
+                <div class="sidebar-section">
+                    <h3>🎮 我的游戏</h3>
+                    <div id="gameList" class="game-list">
+                        <!-- 游戏列表会通过 main.js 动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 网站统计信息 -->
+                <div class="sidebar-section">
+                    <h3>📊 网站统计</h3>
+                    <div id="siteStats">
+                        <p>文章总数: <span id="totalPosts">计算中...</span></p>
+                        <p>上线天数: <span id="onlineDays">计算中...</span></p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<!-- ========== 页脚 ========== -->
-<footer class="footer">
-    <div class="container">
-        <p>${CONFIG.site.title} - ${CONFIG.site.description}</p>
-        <p class="small">登录有效期 ${CONFIG.passwords.expireDays} 天 | 密码在 data/passwords.json 管理</p>
-    </div>
-</footer>
+    <!-- ========== 页脚 ========== -->
+    <footer class="footer">
+        <div class="container">
+            <p id="footer-description">太平地国 - 分享游戏，分享快乐</p>
+            <p class="small" id="footer-info">登录有效期 7 天 | 密码在 data/passwords.json 管理</p>
+        </div>
+    </footer>
 
-<script>
-    // ============================================
-    // 首页功能：登录检查、加载文章、加载游戏
-    // ============================================
-
-    // 页面加载时检查登录状态
-    (function() {
-        const access = localStorage.getItem('site_access');
-        const expire = localStorage.getItem('access_expire');
-
-        // 如果未登录或已过期，跳回登录页
-        if (access !== 'granted' || !expire || Date.now() > parseInt(expire)) {
-            localStorage.removeItem('site_access');
-            localStorage.removeItem('access_expire');
-            window.location.href = 'login.html';
-        }
-    })();
-
-    // 更新用户状态显示
-    function updateUserStatus() {
-        const loginTime = localStorage.getItem('login_time');
-        const userDiv = document.getElementById('userStatus');
-
-        if (loginTime) {
-            userDiv.innerHTML = `
-                <span class="user-badge">已登录</span>
-                <button onclick="logout()" class="btn-logout">退出</button>
-            `;
-        }
-    }
-
-    // 退出登录
-    window.logout = function() {
-        localStorage.removeItem('site_access');
-        localStorage.removeItem('access_expire');
-        localStorage.removeItem('login_time');
-        window.location.href = 'login.html';
-    };
-
-    // ========== 文章相关功能 ==========
-
-    /**
-     * 从GitHub加载所有文章
-     * 文章存储在 Issues 中，带有 'post' 标签
-     */
-    async function loadArticles() {
-        const articleList = document.getElementById('articleList');
-
-        try {
-            // 调用 GitHub API 获取 Issues
-            const response = await fetch(
-                `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/issues?labels=post&state=open&sort=created&direction=desc`
-            );
-
-            if (!response.ok) {
-                throw new Error('加载失败');
-            }
-
-            const articles = await response.json();
-
-            if (articles.length === 0) {
-                articleList.innerHTML = '<p class="empty-message">还没有文章，快来<a href="submit.html">发布第一篇</a>吧！</p>';
-                return;
-            }
-
-            // 生成文章列表HTML
-            let html = '';
-            articles.forEach(article => {
-                // 从文章内容中提取第一张图片作为缩略图
-                const imageMatch = article.body.match(/!\[.*?\]\((.*?)\)/);
-                const thumbnail = imageMatch ? imageMatch[1] : null;
-
-                // 提取纯文本预览（去掉Markdown图片语法）
-                const preview = article.body
-                    .replace(/!\[.*?\]\(.*?\)/g, '')  // 移除图片
-                    .replace(/[#*`>]/g, '')          // 移除Markdown符号
-                    .substring(0, 120) + '...';
-
-                html += `
-                    <div class="article-card" onclick="location.href='article.html?id=${article.number}'">
-                        ${thumbnail ? `<div class="article-thumbnail"><img src="${thumbnail}" alt="缩略图"></div>` : ''}
-                        <div class="article-info">
-                            <h3><a href="article.html?id=${article.number}">${article.title}</a></h3>
-                            <p class="article-preview">${preview}</p>
-                            <div class="article-meta">
-                                <span>👤 ${article.user.login}</span>
-                                <span>📅 ${new Date(article.created_at).toLocaleDateString()}</span>
-                                <span>💬 ${article.comments} 评论</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            articleList.innerHTML = html;
-
-            // 更新文章总数统计
-            document.getElementById('totalPosts').textContent = articles.length;
-
-        } catch (error) {
-            console.error('加载文章失败:', error);
-            articleList.innerHTML = '<p class="error-message">加载失败，请刷新页面重试</p>';
-        }
-    }
-
-    // ========== 游戏列表功能 ==========
-
-    /**
-     * 从配置文件加载游戏列表
-     */
-    function loadGames() {
-        const gameList = document.getElementById('gameList');
-        let html = '';
-
-        // 遍历配置中的游戏
-        CONFIG.games.forEach(game => {
-            if (game.enabled) {
-                html += `
-                    <div class="game-card">
-                        <div class="game-icon">${game.thumbnail}</div>
-                        <div class="game-info">
-                            <h4>${game.name}</h4>
-                            <p class="game-description">${game.description}</p>
-                            <a href="${game.url}" target="_blank" class="btn-play"
-                               onclick="return confirm('即将跳转到 Itch.io 玩游戏，确定吗？')">
-                                开始游戏
-                            </a>
-                        </div>
-                    </div>
-                `;
+    <!-- 页面内嵌脚本（仅用于动态更新标题等） -->
+    <script>
+        // 页面加载后从 CONFIG 更新标题
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof CONFIG !== 'undefined') {
+                // 更新网站标题
+                document.getElementById('site-title').textContent = CONFIG.site.title;
+                document.getElementById('site-subtitle').textContent = CONFIG.site.subtitle;
+                document.getElementById('footer-description').textContent = 
+                    `${CONFIG.site.title} - ${CONFIG.site.description}`;
+                document.getElementById('footer-info').textContent = 
+                    `登录有效期 ${CONFIG.passwords.expireDays} 天 | 密码在 data/passwords.json 管理`;
             }
         });
-
-        gameList.innerHTML = html;
-    }
-
-    // ========== 统计功能 ==========
-
-    /**
-     * 计算网站上线天数
-     * 从仓库创建时间算起
-     */
-    async function calculateOnlineDays() {
-        try {
-            const response = await fetch(
-                `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}`
-            );
-            const data = await response.json();
-
-            const created = new Date(data.created_at);
-            const today = new Date();
-            const diffTime = Math.abs(today - created);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            document.getElementById('onlineDays').textContent = diffDays;
-        } catch (error) {
-            document.getElementById('onlineDays').textContent = '?';
-        }
-    }
-
-    // ========== 页面初始化 ==========
-    updateUserStatus();
-    loadArticles();
-    loadGames();
-    calculateOnlineDays();
-
-    // 定期更新用户状态（比如退出按钮的状态）
-    setInterval(updateUserStatus, 1000);
-</script>
+    </script>
 </body>
-
 </html>
-
-
