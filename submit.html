@@ -32,44 +32,29 @@
         <form id="submitForm" onsubmit="return false;">
             <div class="form-group">
                 <label for="title">文章标题 <span class="required">*</span></label>
-                <input type="text"
-                       id="title"
-                       placeholder="给你的文章起个标题"
-                       required
-                       maxlength="100">
+                <input type="text" id="title" placeholder="给你的文章起个标题" required maxlength="100">
             </div>
 
             <div class="form-group">
                 <label for="content">文章内容 <span class="required">*</span></label>
                 <p class="field-hint">支持 Markdown 语法，可以用 ![](图片链接) 插入图片</p>
-                <textarea id="content"
-                          rows="15"
-                          placeholder="在这里写你的文章..."
-                          required></textarea>
+                <textarea id="content" rows="15" placeholder="在这里写你的文章..." required></textarea>
             </div>
 
             <div class="form-group">
                 <label>上传图片到网站</label>
                 <p class="field-hint">图片会直接存入网站仓库，获得链接后插入文章</p>
-                
                 <div class="upload-area" id="uploadArea">
                     <input type="file" id="imageInput" accept="image/*" multiple>
-                    <button type="button" onclick="uploadToGithub()" class="btn-secondary">
-                        上传图片
-                    </button>
+                    <button type="button" onclick="uploadToGithub()" class="btn-secondary">上传图片</button>
                 </div>
-
                 <div id="uploadProgress" class="upload-progress"></div>
                 <div id="imageLinks" class="image-links"></div>
             </div>
 
             <div class="form-actions">
-                <button type="button" onclick="submitArticle(event)" class="btn-primary btn-large">
-                    发布文章
-                </button>
-                <button type="button" onclick="previewArticle()" class="btn-secondary">
-                    预览
-                </button>
+                <button type="button" onclick="submitArticle(event)" class="btn-primary btn-large">发布文章</button>
+                <button type="button" onclick="previewArticle()" class="btn-secondary">预览</button>
             </div>
         </form>
 
@@ -87,11 +72,7 @@
 </footer>
 
 <script>
-    // ============================================
-    // 投稿页面功能
-    // ============================================
-
-    // 登录检查
+    // 1. 登录检查
     (function() {
         const access = localStorage.getItem('site_access');
         const expire = localStorage.getItem('access_expire');
@@ -100,12 +81,20 @@
         }
     })();
 
-    // 动态获取 Token
+    // 2. 动态解码并获取 Token (解决他人上传问题的核心)
     function getValidToken() {
-        return window.GITHUB_TOKEN || localStorage.getItem('github_token') || '';
+        try {
+            if (typeof CONFIG !== 'undefined' && CONFIG.submission && CONFIG.submission.eToken) {
+                // 解码 Base64 Token
+                return atob(CONFIG.submission.eToken);
+            }
+        } catch (e) {
+            console.error("Token 解码异常");
+        }
+        return '';
     }
 
-    // 图片处理逻辑
+    // 3. 图片上传逻辑
     async function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -127,12 +116,11 @@
         return `uploads/${timestamp}_${random}.${ext}`;
     }
 
-    // 图片上传功能
     window.uploadToGithub = async function() {
         const files = document.getElementById('imageInput').files;
         const token = getValidToken();
         if (files.length === 0) return alert('请选择要上传的图片');
-        if (!token) return alert('请先设置 Token');
+        if (!token) return alert('投稿系统维护中 (Token Error)');
 
         const progressDiv = document.getElementById('uploadProgress');
         const linksDiv = document.getElementById('imageLinks');
@@ -162,9 +150,11 @@
                     linksDiv.innerHTML += `
                         <div class="image-link-item">
                             <p>✅ ${file.name} 成功</p>
-                            <input type="text" value="![img](${imageUrl})" readonly onclick="this.select()" style="width:80%;">
+                            <input type="text" value="![img](${imageUrl})" readonly onclick="this.select()" style="width:70%;">
                             <button onclick="navigator.clipboard.writeText('![img](${imageUrl})').then(()=>alert('已复制'))">复制</button>
                         </div>`;
+                } else {
+                    throw new Error('权限不足或 Token 已失效');
                 }
             } catch (error) {
                 progressDiv.innerHTML += `<br>❌ ${file.name} 失败: ${error.message}`;
@@ -172,23 +162,14 @@
         }
     };
 
-    // 预览逻辑
-    window.previewArticle = function() {
-        const content = document.getElementById('content').value.trim();
-        if (!content) return alert('请输入内容');
-        document.getElementById('previewContent').innerHTML = marked.parse(content);
-        document.getElementById('previewArea').style.display = 'block';
-        document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // 发布文章
+    // 4. 文章发布逻辑
     window.submitArticle = async function(event) {
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
         const token = getValidToken();
 
         if (!title || !content) return alert('请填写标题和内容');
-        if (!token) return alert('未检测到 Token');
+        if (!token) return alert('投稿系统维护中 (Token Error)');
 
         const submitBtn = event.target;
         const originalText = submitBtn.innerText;
@@ -204,7 +185,7 @@
                 },
                 body: JSON.stringify({
                     title: title,
-                    body: content + `\n\n---\n*By: ${localStorage.getItem('login_code') || '用户'}*`,
+                    body: content + `\n\n---\n*By: ${localStorage.getItem('login_code') || '匿名贵物'}*`,
                     labels: ['post']
                 })
             });
@@ -212,14 +193,9 @@
             if (response.ok) {
                 const issue = await response.json();
                 alert('✅ 发布成功！');
-                window.location.href = `/taipingdiguo/article.html?id=${issue.number}`;
+                window.location.href = `/taipingdiguo/index.html`;
             } else {
-                const errorData = await response.json();
-                if (response.status === 404) {
-                    alert('❌ 发布失败 (404)\n请确认：\n1. 仓库已在 Settings -> Features 开启 Issues\n2. config.js 里的仓库名正确');
-                } else {
-                    alert(`❌ 错误: ${errorData.message}`);
-                }
+                alert('❌ 发布失败：请检查 Token 是否有效或 Issues 功能是否开启。');
             }
         } catch (error) {
             alert(`❌ 请求失败: ${error.message}`);
@@ -229,25 +205,20 @@
         }
     };
 
-    // 拖拽支持
-    const uploadArea = document.getElementById('uploadArea');
-    if (uploadArea) {
-        uploadArea.addEventListener('dragover', e => e.preventDefault());
-        uploadArea.addEventListener('drop', e => {
-            e.preventDefault();
-            document.getElementById('imageInput').files = e.dataTransfer.files;
-            uploadToGithub();
-        });
-    }
+    window.previewArticle = function() {
+        const content = document.getElementById('content').value.trim();
+        if (!content) return alert('请输入内容');
+        document.getElementById('previewContent').innerHTML = marked.parse(content);
+        document.getElementById('previewArea').style.display = 'block';
+        document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth' });
+    };
 </script>
 
 <style>
     .upload-progress { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 14px; }
     .image-link-item { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #667eea; }
-    .user-badge { background: #667eea; color: white; padding: 5px 10px; border-radius: 3px; margin-right: 10px; }
     .preview-content { padding: 20px; background: white; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; }
     .preview-content img { max-width: 100%; }
 </style>
 </body>
 </html>
-
