@@ -3,9 +3,6 @@
 // 包含：登录检查、文章加载、游戏加载、统计功能等
 // ============================================
 
-// ---------- 全局变量 ----------
-// 从 localStorage 读取 GitHub Token
-const GITHUB_TOKEN = localStorage.getItem('github_token') || '';
 
 // ---------- 登录相关 ----------
 
@@ -245,4 +242,5 @@ document.addEventListener('DOMContentLoaded', function() {
 // 暴露全局函数
 window.logout = logout;
 window.copyToClipboard = copyToClipboard;
+
 
