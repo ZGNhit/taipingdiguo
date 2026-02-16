@@ -6,8 +6,7 @@ const CONFIG = {
     // 1. GitHub 仓库信息
     github: {
         username: 'ZGNhit',
-        // 关键修正：必须写全名，否则投稿会报 404
-        repo: 'taipingdiguo.github.io', 
+        repo: 'taipingdiguo', 
     },
 
     // 2. 网站基本信息
@@ -67,3 +66,4 @@ CONFIG.passwords.fileUrl = `https://raw.githubusercontent.com/${CONFIG.github.us
 
 // 确保在控制台能看到配置已加载（调试用）
 console.log("CONFIG loaded successfully:", CONFIG);
+
