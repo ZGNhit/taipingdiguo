@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>投稿 - 太平地国</title>
-    <link rel="stylesheet" href="/taipingdiguo/css/style.css">
-    <script src="/taipingdiguo/js/config.js"></script>
-    <script src="/taipingdiguo/js/marked.min.js"></script>
-    <script src="/taipingdiguo/js/main.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+    <script src="js/marked.min.js"></script>
+    <script src="js/main.js"></script>
 </head>
 <body>
 <nav class="navbar">
     <div class="nav-container">
         <div class="nav-brand">
-            <a href="/taipingdiguo/index.html">🎮 太平地国</a>
+            <a href="index.html">🎮 太平地国</a>
         </div>
         <div class="nav-menu">
-            <a href="/taipingdiguo/index.html">首页</a>
-            <a href="/taipingdiguo/submit.html" class="active">投稿</a>
-            <a href="/taipingdiguo/about.html">关于</a>
+            <a href="index.html">首页</a>
+            <a href="submit.html" class="active">投稿</a>
+            <a href="about.html">关于</a>
         </div>
         <div class="nav-user" id="userStatus"></div>
     </div>
@@ -72,16 +72,16 @@
 </footer>
 
 <script>
-    // 1. 登录检查
+    //  登录检查
     (function() {
         const access = localStorage.getItem('site_access');
         const expire = localStorage.getItem('access_expire');
         if (access !== 'granted' || !expire || Date.now() > parseInt(expire)) {
-            window.location.href = '/taipingdiguo/login.html';
+            window.location.href = 'login.html';
         }
     })();
 
-    // 2. 动态解码并获取 Token (解决他人上传问题的核心)
+    //  动态解码并获取 Token 
     function getValidToken() {
         try {
            if (typeof CONFIG !== 'undefined' && CONFIG.submission) {
@@ -98,7 +98,7 @@
         return '';
     }
 
-    // 3. 图片上传逻辑
+    //  图片上传逻辑
     async function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -166,7 +166,7 @@
         }
     };
 
-    // 4. 文章发布逻辑
+    //  文章发布逻辑
     window.submitArticle = async function(event) {
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
@@ -197,7 +197,7 @@
             if (response.ok) {
                 const issue = await response.json();
                 alert('✅ 发布成功！');
-                window.location.href = `/taipingdiguo/index.html`;
+                window.location.href = `index.html`;
             } else {
                 alert('❌ 发布失败：请检查 Token 是否有效或 Issues 功能是否开启。');
             }
@@ -226,6 +226,7 @@
 </style>
 </body>
 </html>
+
 
 
 
