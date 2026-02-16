@@ -1,7 +1,3 @@
-// ============================================
-// 网站配置文件 - 太平地国
-// ============================================
-
 const CONFIG = {
     // 1. GitHub 仓库信息
     github: {
@@ -39,17 +35,15 @@ const CONFIG = {
     // 4. 关于页面内容
     about: {
         title: '关于本站',
-        // 关键修正：使用了反引号 `` 确保支持多行文字，且必须在末尾闭合
-        content: `欢迎来到太平地国。这里是分享游戏和贵物心得的地方。
-        目前网站支持投稿和在线游玩。`,
+        content: '欢迎来到太平地国。这里是分享游戏和贵物心得的地方。',
         showOnMenu: true
     },
 
     // 5. 密码设置
     passwords: {
         expireDays: 365,
-        // 下方会自动拼接完整 URL，此处留空即可
-        fileUrl: '' 
+        // 修正：确保路径指向根目录下的 data 文件夹
+        fileUrl: 'https://raw.githubusercontent.com/ZGNhit/taipingdiguo.github.io/main/data/passwords.json'
     },
 
     // 6. 主题颜色
@@ -61,9 +55,5 @@ const CONFIG = {
     }
 };
 
-// 7. 自动生成路径 (这部分非常重要，main.js 依赖它读取密码文件)
-CONFIG.passwords.fileUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/data/passwords.json`;
-
-// 确保在控制台能看到配置已加载（调试用）
-console.log("CONFIG loaded successfully:", CONFIG);
-
+// 保持变量一致性
+console.log("CONFIG 加载成功，当前密码路径:", CONFIG.passwords.fileUrl);
