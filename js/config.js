@@ -6,8 +6,8 @@
 const CONFIG = {
     // GitHub 仓库信息（必填）
     github: {
-        username: 'ZGNhit',           // 你的 GitHub 用户名
-        repo: 'taipingdiguo.github.io',               // 你的仓库名称（通常是 用户名.github.io）
+        username: 'ZGNhit',           // GitHub 用户名
+        repo: 'taipingdiguo',               // 仓库名称
     },
 
     // 网站基本信息（按需修改）
@@ -73,4 +73,5 @@ const CONFIG = {
 };
 
 // 自动生成密码文件的完整URL（不用改）
+
 CONFIG.passwords.fileUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/data/passwords.json`;
