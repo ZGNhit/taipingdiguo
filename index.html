@@ -32,7 +32,7 @@
         <!-- 网站标题区 -->
         <header class="page-header">
             <h1 id="site-title">太平地国</h1>
-            <p class="subtitle" id="site-subtitle">分享游戏，分享快乐</p>
+            <p class="subtitle" id="site-subtitle">分享快乐</p>
         </header>
 
         <!-- 两列布局：左侧文章列表，右侧游戏入口 -->
@@ -40,7 +40,7 @@
             <!-- 左侧：文章列表 -->
             <div class="main-content">
                 <div class="section-header">
-                    <h2>📝 最新玩家文章</h2>
+                    <h2>📝 最新文章</h2>
                     <a href="/taipingdiguo/submit.html" class="btn-small">我也要投稿</a>
                 </div>
                 
@@ -54,7 +54,7 @@
             <div class="sidebar">
                 <!-- 游戏入口区域 -->
                 <div class="sidebar-section">
-                    <h3>🎮 我的游戏</h3>
+                    <h3>🎮 地国游戏</h3>
                     <div id="gameList" class="game-list">
                         <!-- 游戏列表会通过 main.js 动态生成 -->
                     </div>
@@ -75,8 +75,8 @@
     <!-- ========== 页脚 ========== -->
     <footer class="footer">
         <div class="container">
-            <p id="footer-description">太平地国 - 分享游戏，分享快乐</p>
-            <p class="small" id="footer-info">登录有效期 7 天 | 密码在 data/passwords.json 管理</p>
+            <p id="footer-description">太平地国 - 一群贵物</p>
+            <p class="small" id="footer-info">登录</p>
         </div>
     </footer>
 
@@ -91,9 +91,10 @@
                 document.getElementById('footer-description').textContent = 
                     `${CONFIG.site.title} - ${CONFIG.site.description}`;
                 document.getElementById('footer-info').textContent = 
-                    `登录有效期 ${CONFIG.passwords.expireDays} 天 | 密码在 data/passwords.json 管理`;
+                    `登录有效期 ${CONFIG.passwords.expireDays} 天 ;
             }
         });
     </script>
 </body>
 </html>
+
