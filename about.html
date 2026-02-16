@@ -9,41 +9,55 @@
     <script src="/taipingdiguo/js/main.js"></script>
 </head>
 <body>
-<!-- 导航栏（同首页） -->
 <nav class="navbar">
-    <!-- ... 和首页相同的导航栏 ... -->
+    <div class="nav-container">
+        <div class="nav-brand">
+            <a href="/taipingdiguo/index.html">🎮 太平地国</a>
+        </div>
+        <div class="nav-menu">
+            <a href="/taipingdiguo/index.html">首页</a>
+            <a href="/taipingdiguo/submit.html">投稿</a>
+            <a href="/taipingdiguo/about.html" class="active">关于</a>
+        </div>
+        <div class="nav-user" id="userStatus"></div>
+    </div>
 </nav>
 
 <main class="container">
     <div class="about-container">
-        <!-- 从配置文件读取关于页面内容 -->
-        <h1>${CONFIG.about.title}</h1>
-        <div class="about-content">
-            ${CONFIG.about.content}
-        </div>
+        <h1 id="aboutTitle">正在加载...</h1>
+        <div class="about-content" id="aboutBody">
+            </div>
 
-        <!-- 留白区域，可以直接在这里加内容 -->
         <div class="about-custom">
-            <!--
-                ========================================
-                这里完全空白，你可以直接添加 HTML 内容
-                例如：
-
-                <h2>我的联系方式</h2>
-                <p>邮箱：example@email.com</p>
-
-                <h2>网站历史</h2>
-                <p>建于 2024年...</p>
-
-                想加什么就加什么
-                ========================================
-            -->
+            <hr>
             <h2>看什么呢</h2>
+            <p>这里可以添加你手动想写的内容。</p>
         </div>
     </div>
 </main>
+
+<script>
+    // 渲染配置内容的逻辑
+    document.addEventListener('DOMContentLoaded', () => {
+        const titleEl = document.getElementById('aboutTitle');
+        const bodyEl = document.getElementById('aboutBody');
+
+        if (window.CONFIG && CONFIG.about) {
+            titleEl.textContent = CONFIG.about.title;
+            // 如果 content 包含 HTML 标签，使用 innerHTML
+            bodyEl.innerHTML = CONFIG.about.content;
+        } else {
+            titleEl.textContent = "关于我们";
+            bodyEl.textContent = "暂无配置信息。";
+        }
+    });
+</script>
+
+<footer class="footer">
+    <div class="container">
+        <p>太平地国 - 分享游戏，分享快乐</p>
+    </div>
+</footer>
 </body>
-
 </html>
-
-
