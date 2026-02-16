@@ -5,110 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 太平地国</title>
     <link rel="stylesheet" href="/taipingdiguo/css/style.css">
-    <!-- 引入配置文件 -->
     <script src="/taipingdiguo/js/config.js"></script>
     <script src="/taipingdiguo/js/main.js"></script>
 </head>
 <body class="login-page">
-<div class="login-container">
-    <!-- 网站标题，从配置文件读取 -->
-    <h1>🔐 ${CONFIG.site.title}</h1>
-    <p class="subtitle">${CONFIG.site.subtitle}</p>
-
-    <div class="login-box">
-        <h2>请输入访问密码</h2>
-        <p class="hint">密码可以在 data/passwords.json 中修改</p>
-
-        <!-- 密码输入框 -->
-        <input type="password"
-               id="passwordInput"
-               placeholder="输入密码"
-               autofocus
-               onkeypress="if(event.key==='Enter') checkPassword()">
-
-        <button onclick="checkPassword()" class="btn-primary">
-            进入网站
-        </button>
-
-        <!-- 错误信息显示区域 -->
-        <div id="errorMessage" class="error-message"></div>
+    <div class="login-container">
+        <!-- 网站标题，通过 JavaScript 动态更新 -->
+        <h1 id="login-title">🔐 太平地国</h1>
+        <p class="subtitle" id="login-subtitle">神人开会</p>
+        
+        <div class="login-box">
+            <h2>请输入访问密码</h2>
+            <p class="hint">你的名字的全拼</p>
+            
+            <!-- 密码输入框 -->
+            <input type="password" 
+                   id="passwordInput" 
+                   placeholder="输入密码" 
+                   autofocus
+                   onkeypress="if(event.key==='Enter') checkPassword()">
+            
+            <button onclick="checkPassword()" class="btn-primary">
+                进入网站
+            </button>
+            
+            <!-- 错误信息显示区域 -->
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+        
+        <!-- 关于本站的快速链接 -->
+        <p class="login-footer">
+            <a href="/taipingdiguo/about.html">关于本站</a> | 
+            <span>需要密码？联系管理员</span>
+        </p>
     </div>
 
-    <!-- 关于本站的快速链接 -->
-    <p class="login-footer">
-        <a href="about.html">关于本站</a> |
-        <span>需要密码？联系管理员</span>
-    </p>
-</div>
-
-<script>
+    <script>
     // ============================================
-    // 登录验证功能
+    // 登录页面功能
     // ============================================
-
-    // 页面加载时检查是否已登录
-    (function() {
+    
+    // 页面加载时从 CONFIG 更新标题
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof CONFIG !== 'undefined') {
+            document.getElementById('login-title').textContent = `🔐 ${CONFIG.site.title}`;
+            document.getElementById('login-subtitle').textContent = CONFIG.site.subtitle;
+        }
+        
+        // 检查是否已登录
         const access = localStorage.getItem('site_access');
         const expire = localStorage.getItem('access_expire');
-
+        
         // 如果已登录且未过期，直接跳转首页
         if (access === 'granted' && expire && Date.now() < parseInt(expire)) {
-            window.location.href = 'index.html';
+            window.location.href = '/taipingdiguo/index.html';
         }
-    })();
-
+    });
+    
     /**
      * 从GitHub加载密码文件
-     * 从 data/passwords.json 读取有效密码列表
      */
     async function loadPasswords() {
         try {
-            // 添加时间戳避免缓存
-            const url = CONFIG.passwords.fileUrl + '?t=' + Date.now();
+            // 从 config.js 获取密码文件地址，如果 CONFIG 未定义则使用默认路径
+            const url = typeof CONFIG !== 'undefined' && CONFIG.passwords?.fileUrl
+                ? CONFIG.passwords.fileUrl + '?t=' + Date.now()
+                : 'https://raw.githubusercontent.com/zgnhit/taipingdiguo/main/data/passwords.json?t=' + Date.now();
+            
             const response = await fetch(url);
-
+            
             if (!response.ok) {
                 throw new Error('无法加载密码文件');
             }
-
+            
             const data = await response.json();
-            // 返回密码列表（转为小写方便比较）
             return data.valid_passwords.map(p => p.toLowerCase());
         } catch (error) {
             console.error('读取密码失败:', error);
-            // 如果网络请求失败，使用备用密码（方便开发测试）
+            // 备用密码
             return ['game2024', 'renpyfan', 'test123'];
         }
     }
-
+    
     /**
      * 验证用户输入的密码
      */
     async function checkPassword() {
         const inputPwd = document.getElementById('passwordInput').value.trim().toLowerCase();
         const errorDiv = document.getElementById('errorMessage');
-
+        
         // 检查是否输入为空
         if (!inputPwd) {
             errorDiv.textContent = '❌ 请输入密码';
             return;
         }
-
+        
         // 加载有效密码
         const validPasswords = await loadPasswords();
-
+        
         // 验证密码
         if (validPasswords.includes(inputPwd)) {
-            // 密码正确：计算过期时间
-            const expireTime = Date.now() + CONFIG.passwords.expireDays * 24 * 60 * 60 * 1000;
-
+            // 密码正确：获取有效期
+            const expireDays = typeof CONFIG !== 'undefined' && CONFIG.passwords?.expireDays 
+                ? CONFIG.passwords.expireDays 
+                : 7;
+            
+            const expireTime = Date.now() + expireDays * 24 * 60 * 60 * 1000;
+            
             // 保存登录状态
             localStorage.setItem('site_access', 'granted');
             localStorage.setItem('access_expire', expireTime);
             localStorage.setItem('login_time', new Date().toLocaleString());
-
+            localStorage.setItem('login_code', inputPwd);  // 保存使用的密码
+            
             // 跳转到首页
-            window.location.href = 'index.html';
+            window.location.href = '/taipingdiguo/index.html';
         } else {
             // 密码错误
             errorDiv.textContent = '❌ 密码错误，请重试';
@@ -116,9 +127,9 @@
             document.getElementById('passwordInput').focus();
         }
     }
-</script>
+    
+    // 暴露全局函数（供 onclick 调用）
+    window.checkPassword = checkPassword;
+    </script>
 </body>
-
 </html>
-
-
