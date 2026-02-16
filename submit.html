@@ -88,15 +88,26 @@
 
 <script>
     // ============================================
-    // 投稿页面功能 - 修正变量冲突版
+    // 投稿页面功能 - 修复版
     // ============================================
 
-    // 注意：GITHUB_TOKEN 已经在 main.js 中通过 const 声明，此处直接使用，严禁再次声明
+    // 1. 登录检查：只保留逻辑，不重复定义全局变量
+    (function() {
+        const access = localStorage.getItem('site_access');
+        const expire = localStorage.getItem('access_expire');
+        if (access !== 'granted' || !expire || Date.now() > parseInt(expire)) {
+            window.location.href = '/taipingdiguo/login.html';
+        }
+    })();
 
-    /**
-     * 文件转 Base64
-     */
-    function fileToBase64(file) {
+    // 2. 动态获取 Token：解决 SyntaxError (Identifier already declared)
+    // 不再使用 const GITHUB_TOKEN，而是通过函数动态获取
+    function getValidToken() {
+        return window.GITHUB_TOKEN || localStorage.getItem('github_token') || '';
+    }
+
+    // 3. 图片处理逻辑
+    async function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -105,43 +116,30 @@
         });
     }
 
-    /**
-     * 生成唯一文件名
-     */
     function generateFileName(originalName) {
         const date = new Date();
         const timestamp = date.getFullYear() + 
             String(date.getMonth() + 1).padStart(2, '0') + 
             String(date.getDate()).padStart(2, '0') + '_' +
             String(date.getHours()).padStart(2, '0') + 
-            String(date.getMinutes()).padStart(2, '0') + 
-            String(date.getSeconds()).padStart(2, '0');
+            String(date.getMinutes()).padStart(2, '0');
         const ext = originalName.split('.').pop().toLowerCase();
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
         return `uploads/${timestamp}_${random}.${ext}`;
     }
 
-    /**
-     * 上传图片到 GitHub
-     */
+    // 4. 图片上传功能
     window.uploadToGithub = async function() {
         const files = document.getElementById('imageInput').files;
+        const token = getValidToken();
         if (files.length === 0) return alert('请选择要上传的图片');
-
-        // 使用 main.js 中已加载的 GITHUB_TOKEN
-        if (!window.GITHUB_TOKEN && !localStorage.getItem('github_token')) {
-            alert('请先在控制台设置 GitHub Token：\nlocalStorage.setItem("github_token", "你的token")');
-            return;
-        }
-        const activeToken = window.GITHUB_TOKEN || localStorage.getItem('github_token');
+        if (!token) return alert('请先设置 Token');
 
         const progressDiv = document.getElementById('uploadProgress');
         const linksDiv = document.getElementById('imageLinks');
         progressDiv.innerHTML = '🔄 准备上传...';
 
-        for (const file of files) {
-            if (file.size > 100 * 1024 * 1024 || !file.type.startsWith('image/')) continue;
-
+        for (let file of files) {
             try {
                 progressDiv.innerHTML += `<br>🔄 正在上传: ${file.name}`;
                 const fileName = generateFileName(file.name);
@@ -150,7 +148,7 @@
                 const response = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${fileName}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${activeToken}`,
+                        'Authorization': `token ${token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -164,16 +162,10 @@
                     const imageUrl = `https://raw.githubusercontent.com/${CONFIG.github.username}/${CONFIG.github.repo}/main/${fileName}`;
                     linksDiv.innerHTML += `
                         <div class="image-link-item">
-                            <p>✅ ${file.name} 上传成功</p>
-                            <div style="display: flex; gap: 5px; margin: 5px 0;">
-                                <input type="text" value="![${file.name}](${imageUrl})" readonly onclick="this.select()" style="flex: 1; padding: 5px;">
-                                <button onclick="copyToClipboard('![${file.name}](${imageUrl})')" style="padding: 5px 10px;">复制</button>
-                            </div>
+                            <p>✅ ${file.name} 成功</p>
+                            <input type="text" value="![img](${imageUrl})" readonly onclick="this.select()" style="width:80%;">
+                            <button onclick="navigator.clipboard.writeText('![img](${imageUrl})').then(()=>alert('已复制'))">复制</button>
                         </div>`;
-                    progressDiv.innerHTML += `<br>✅ 完成: ${file.name}`;
-                } else {
-                    const data = await response.json();
-                    throw new Error(data.message || '上传失败');
                 }
             } catch (error) {
                 progressDiv.innerHTML += `<br>❌ ${file.name} 失败: ${error.message}`;
@@ -181,70 +173,66 @@
         }
     };
 
-    /**
-     * 文章预览
-     */
+    // 5. 预览逻辑
     window.previewArticle = function() {
         const content = document.getElementById('content').value.trim();
-        if (!content) return alert('请输入文章内容');
-        const previewDiv = document.getElementById('previewArea');
+        if (!content) return alert('请输入内容');
         document.getElementById('previewContent').innerHTML = marked.parse(content);
-        previewDiv.style.display = 'block';
-        previewDiv.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('previewArea').style.display = 'block';
+        document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth' });
     };
 
-    /**
-     * 提交文章到 GitHub
-     */
+    // 6. 发布文章：解决 Post 404 与 ReferenceError
     window.submitArticle = async function(event) {
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
+        const token = getValidToken();
 
         if (!title || !content) return alert('请填写标题和内容');
-
-        const activeToken = window.GITHUB_TOKEN || localStorage.getItem('github_token');
-        if (!activeToken) return alert('未检测到 Token');
+        if (!token) return alert('未检测到 Token');
 
         const submitBtn = event.target;
         const originalText = submitBtn.innerText;
+        submitBtn.innerText = '发布中...';
+        submitBtn.disabled = true;
 
         try {
-            submitBtn.innerText = '发布中...';
-            submitBtn.disabled = true;
-
-            const loginCode = localStorage.getItem('login_code') || 'unknown';
-            const articleBody = content + `\n\n---\n*本文由密码用户 ${loginCode} 发布于 ${new Date().toLocaleString()}*`;
-
+            // 注意：API 路径必须匹配 CONFIG 里的配置
             const response = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/issues`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `token ${activeToken}`,
+                    'Authorization': `token ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     title: title,
-                    body: articleBody,
+                    body: content + `\n\n---\n*By: ${localStorage.getItem('login_code') || '用户'}*`,
                     labels: ['post']
                 })
             });
 
             if (response.ok) {
                 const issue = await response.json();
-                alert('✅ 文章发布成功！');
+                alert('✅ 发布成功！');
                 window.location.href = `/taipingdiguo/article.html?id=${issue.number}`;
             } else {
                 const errorData = await response.json();
-                throw new Error(errorData.message || '发布失败');
+                // 如果返回 404，极大概率是仓库没开 Issues
+                if (response.status === 404) {
+                    alert('❌ 发布失败 (404)\n请确认：\n1. 仓库已在 Settings -> Features 开启 Issues\n2. config.js 里的仓库名正确');
+                } else {
+                    alert(`❌ 错误: ${errorData.message}`);
+                }
             }
         } catch (error) {
-            alert(`❌ 发布失败: ${error.message}`);
+            alert(`❌ 请求失败: ${error.message}`);
         } finally {
             submitBtn.innerText = originalText;
             submitBtn.disabled = false;
         }
     };
 
-    // 拖拽上传支持
+    // 7. 拖拽支持
     const uploadArea = document.getElementById('uploadArea');
     if (uploadArea) {
         uploadArea.addEventListener('dragover', e => e.preventDefault());
@@ -258,7 +246,7 @@
 
 <style>
     .upload-progress { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 14px; }
-    .image-link-item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #667eea; }
+    .image-link-item { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #667eea; }
     .user-badge { background: #667eea; color: white; padding: 5px 10px; border-radius: 3px; margin-right: 10px; }
     .preview-content { padding: 20px; background: white; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; }
     .preview-content img { max-width: 100%; }
