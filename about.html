@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 - 太平地国</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+</head>
+<body>
+<!-- 导航栏（同首页） -->
+<nav class="navbar">
+    <!-- ... 和首页相同的导航栏 ... -->
+</nav>
+
+<main class="container">
+    <div class="about-container">
+        <!-- 从配置文件读取关于页面内容 -->
+        <h1>${CONFIG.about.title}</h1>
+        <div class="about-content">
+            ${CONFIG.about.content}
+        </div>
+
+        <!-- 留白区域，可以直接在这里加内容 -->
+        <div class="about-custom">
+            <!--
+                ========================================
+                这里完全空白，你可以直接添加 HTML 内容
+                例如：
+
+                <h2>我的联系方式</h2>
+                <p>邮箱：example@email.com</p>
+
+                <h2>网站历史</h2>
+                <p>建于 2024年...</p>
+
+                想加什么就加什么
+                ========================================
+            -->
+            <h2>看什么呢</h2>
+        </div>
+    </div>
+</main>
+</body>
+</html>
